@@ -1,0 +1,36 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+#
+#
+$scriptsudo = <<SCRIPTSUDO
+apt-get update
+apt-get install -y g++
+curl -sL https://raw.githubusercontent.com/nodesource/distributions/master/deb/setup_6.x | sh
+apt-get install -y git
+apt-get install -y sqlite3
+apt-get install -y nodejs
+# Installing MySQL and it's dependencies, Also, setting up root password for MySQL as it will prompt to enter the password during installation
+debconf-set-selections <<< 'mysql-server-5.5 mysql-server/root_password password root'
+debconf-set-selections <<< 'mysql-server-5.5 mysql-server/root_password_again password root'
+apt-get install -y mysql-server
+echo "127.0.0.1 mysql" | tee -a /etc/hosts
+SCRIPTSUDO
+
+$scriptuser = <<SCRIPTUSER
+# todo add msql to /etc/hosts
+git clone https://github.com/manuelkiessling/nodecraftsman
+cd ~/nodecraftsman/ch10_building_a_complete_web_application_with_nodejs_and_angularjs
+npm install
+SCRIPTUSER
+
+
+Vagrant.configure(2) do |config|
+ config.vm.box = "ubuntu/trusty64"
+ config.vm.provision "shell", inline: $scriptsudo
+ config.vm.provision "shell", inline: $scriptuser, privileged: false
+end
